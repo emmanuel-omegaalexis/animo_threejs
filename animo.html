@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animo Brix</title>
+
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Import Map for Three.js Modules (Keep this in HTML) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Main container for the 3D scene -->
+    <div id="container"></div>
+
+    <!-- UI Controls -->
+    <div id="controls">
+        <button id="cycleBtn">Next Structure</button>
+        <span id="structureInfo"></span> <!-- Displays current structure name -->
+    </div>
+
+    <!-- Link to the external JavaScript file (use type="module") -->
+    <script type="module" src="script6.js"></script>
+</body>
+</html>

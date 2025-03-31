@@ -1,0 +1,57 @@
+[
+    {
+        "name": "Json1 (1x1 Yellow)",
+        "data": [
+            {"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"56","connectedToHole":1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},
+            {"id":"56","colour":"yellow","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"1","connectedToHole":0,"orientation":0}]}
+        ]
+    },
+    {
+        "name": "Json2 (2x1 Orange 0d)",
+        "data": [
+            {"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"22","connectedToHole":2,"orientation":0},{"id":1,"brick":"22","connectedToHole":3,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},
+            {"id":"22","colour":"orange","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"1","connectedToHole":0,"orientation":0},{"id":3,"brick":"1","connectedToHole":1,"orientation":0}]}
+        ]
+    },
+    {
+        "name": "Json3 (2x1 Orange 90d)",
+        "data": [
+            {"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"22","connectedToHole":2,"orientation":90},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"22","connectedToHole":3,"orientation":90},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},
+            {"id":"22","colour":"orange","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"1","connectedToHole":0,"orientation":0},{"id":3,"brick":"1","connectedToHole":4,"orientation":0}]}
+        ]
+    },
+    {
+        "name": "Json5 (Stacked 2x1)",
+        "data": [
+            {"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"22","connectedToHole":2,"orientation":90},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"22","connectedToHole":3,"orientation":90},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},
+            {"id":"22","colour":"orange","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"60","connectedToHole":2,"orientation":0},{"id":1,"brick":"60","connectedToHole":3,"orientation":0},{"id":2,"brick":"1","connectedToHole":0,"orientation":0},{"id":3,"brick":"1","connectedToHole":4,"orientation":0}]},
+            {"id":"60","colour":"yellow","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"22","connectedToHole":0,"orientation":0},{"id":3,"brick":"22","connectedToHole":1,"orientation":0}]}
+        ]
+    },
+    {
+        "name": "Json7 (Stacked 1x1)",
+        "data": [
+            {"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"35","connectedToHole":1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},
+            {"id":"35","colour":"pink","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"56","connectedToHole":1,"orientation":0},{"id":1,"brick":"1","connectedToHole":0,"orientation":0}]},
+            {"id":"56","colour":"yellow","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"35","connectedToHole":0,"orientation":0}]}
+        ]
+    },
+    {
+        "name": "Json8 (Steps)",
+        "data": [
+            {"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"48","connectedToHole":3,"orientation":0},{"id":1,"brick":"48","connectedToHole":4,"orientation":0},{"id":2,"brick":"48","connectedToHole":5,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},
+            {"id":"48","colour":"purple","type":"3x1","macaddress":"","holes":[{"id":0,"brick":"22","connectedToHole":2,"orientation":0},{"id":1,"brick":"22","connectedToHole":3,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"1","connectedToHole":0,"orientation":0},{"id":4,"brick":"1","connectedToHole":1,"orientation":0},{"id":5,"brick":"1","connectedToHole":2,"orientation":0}]},
+            {"id":"22","colour":"orange","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"35","connectedToHole":1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"48","connectedToHole":0,"orientation":0},{"id":3,"brick":"48","connectedToHole":1,"orientation":0}]},
+            {"id":"35","colour":"pink","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"56","connectedToHole":1,"orientation":0},{"id":1,"brick":"22","connectedToHole":0,"orientation":0}]},
+            {"id":"56","colour":"yellow","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"35","connectedToHole":0,"orientation":0}]}
+        ]
+    },
+    {
+        "name": "Json10 (Corners)",
+        "data": [
+            {"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"56","connectedToHole":1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"35","connectedToHole":1,"orientation":0}]},
+            {"id":"56","colour":"yellow","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"1","connectedToHole":0,"orientation":0}]},
+            {"id":"35","colour":"pink","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"1","connectedToHole":15,"orientation":0}]}
+        ]
+    }
+]

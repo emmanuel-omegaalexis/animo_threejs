@@ -1,0 +1,35 @@
+/* Basic body styling */
+body {
+    margin: 0; /* Remove default body margin */
+    overflow: hidden; /* Prevent scrollbars */
+    font-family: sans-serif; /* Use a common sans-serif font */
+    background-color: #333; /* Dark grey background */
+    color: white; /* White text color */
+}
+
+/* Container for the Three.js canvas */
+#container {
+    width: 100vw; /* Full viewport width */
+    height: 100vh; /* Full viewport height */
+    display: block; /* Ensure it behaves like a block element */
+}
+
+/* Positioning for UI controls */
+#controls {
+    position: absolute; /* Position relative to the viewport */
+    top: 10px; /* Distance from the top */
+    left: 10px; /* Distance from the left */
+    z-index: 100; /* Ensure controls are above the canvas */
+}
+
+/* Styling for the button */
+button {
+    padding: 8px 15px; /* Padding inside the button */
+    font-size: 1em; /* Standard font size */
+    cursor: pointer; /* Indicate interactivity */
+}
+
+/* Spacing for the structure information text */
+#structureInfo {
+    margin-left: 15px;
+}
