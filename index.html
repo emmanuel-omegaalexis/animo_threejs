@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Brick Viewer</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: sans-serif; background-color: #333; color: white; }
+        #container { width: 100vw; height: 100vh; display: block; }
+        #controls { position: absolute; top: 10px; left: 10px; z-index: 100; }
+        button { padding: 8px 15px; font-size: 1em; cursor: pointer; }
+    </style>
+    <!-- Import Map for Three.js Modules -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="controls">
+        <button id="cycleBtn">Next Structure</button>
+        <span id="structureInfo" style="margin-left: 15px;"></span>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // --- Configuration & Constants (Mirrors Roblox) ---
+        const STUD_SIZE = 2;    // Doubled size
+        const PLATE_HEIGHT = 2.4; // Doubled size
+        const BASE_COLOR = 0xffffff; // White
+
+        // --- Scene Setup ---
+        let scene, camera, renderer, controls;
+        let basePlateMesh = null;       // Reference to the base plate
+        let structureGroup = new THREE.Group(); // Group for bricks ON the base
+        const container = document.getElementById('container');
+
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x445566);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(15, 20, 25);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
+
+            // Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.1;
+            controls.screenSpacePanning = false;
+            controls.target.set(0, 2, 0); // Look slightly above origin
+
+            // Grid Helper (optional)
+            const gridHelper = new THREE.GridHelper(50, 50 / STUD_SIZE, 0x888888, 0x444444);
+            gridHelper.position.y = -PLATE_HEIGHT / 2; // Place slightly below where base bottom will be
+            scene.add(gridHelper);
+
+            // Add the main structure group
+            scene.add(structureGroup);
+
+            // Event Listeners
+            window.addEventListener('resize', onWindowResize);
+            document.getElementById('cycleBtn').addEventListener('click', cycleStructure);
+
+            // Initial Build
+            buildStructure(jsonData[currentJsonIndex].data);
+            updateStructureInfo();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
+            renderer.render(scene, camera);
+        }
+
+        // --- Brick Logic ---
+
+        const BRICK_DEFINITIONS = {
+            "base": {
+                Size: new THREE.Vector3(4 * STUD_SIZE, PLATE_HEIGHT, 4 * STUD_SIZE),
+                HoleOffsets: function(holeId) {
+                    const col = holeId % 4;
+                    const row = Math.floor(holeId / 4);
+                    const xOffset = (col - 1.5) * STUD_SIZE;
+                    const zOffset = (row - 1.5) * STUD_SIZE;
+                    const yOffset = PLATE_HEIGHT / 2; // Top surface
+                    return new THREE.Vector3(xOffset, yOffset, zOffset);
+                },
+                IsBase: true
+            },
+            "3x1": {
+                Size: new THREE.Vector3(3 * STUD_SIZE, PLATE_HEIGHT, 1 * STUD_SIZE),
+                HoleOffsets: function(holeId) {
+                    const yOffset = (holeId <= 2) ? (PLATE_HEIGHT / 2) : (-PLATE_HEIGHT / 2);
+                    let xOffset = 0;
+                    if (holeId === 0 || holeId === 3) xOffset = -1 * STUD_SIZE;
+                    if (holeId === 2 || holeId === 5) xOffset = 1 * STUD_SIZE;
+                    const zOffset = 0;
+                    return new THREE.Vector3(xOffset, yOffset, zOffset);
+                },
+                TopHoleIds: [0, 1, 2],
+                BottomHoleIds: [3, 4, 5]
+            },
+            "2x1": {
+                Size: new THREE.Vector3(2 * STUD_SIZE, PLATE_HEIGHT, 1 * STUD_SIZE),
+                HoleOffsets: function(holeId) {
+                    const yOffset = (holeId <= 1) ? (PLATE_HEIGHT / 2) : (-PLATE_HEIGHT / 2);
+                    const xOffset = (holeId === 0 || holeId === 2) ? (-0.5 * STUD_SIZE) : (0.5 * STUD_SIZE);
+                    const zOffset = 0;
+                    return new THREE.Vector3(xOffset, yOffset, zOffset);
+                },
+                TopHoleIds: [0, 1],
+                BottomHoleIds: [2, 3]
+            },
+            "1x1": {
+                Size: new THREE.Vector3(1 * STUD_SIZE, PLATE_HEIGHT, 1 * STUD_SIZE),
+                HoleOffsets: function(holeId) {
+                    const yOffset = (holeId === 0) ? (PLATE_HEIGHT / 2) : (-PLATE_HEIGHT / 2);
+                    const xOffset = 0;
+                    const zOffset = 0;
+                    return new THREE.Vector3(xOffset, yOffset, zOffset);
+                },
+                TopHoleIds: [0],
+                BottomHoleIds: [1]
+            }
+        };
+
+        // Simple color map - using hex values
+        const COLOR_MAP = {
+            "white": 0xffffff,
+            "yellow": 0xffff00,
+            "blue": 0x0000ff,
+            "orange": 0xffa500,
+            "pink": 0xffc0cb,
+            "purple": 0x800080,
+            "green": 0x00ff00,
+            "default": 0x888888 // Medium grey
+        };
+
+        function getBrickDefinition(brickType) {
+            return BRICK_DEFINITIONS[brickType];
+        }
+
+        function getBrickColorHex(colorName) {
+            return COLOR_MAP[colorName?.toLowerCase()] || COLOR_MAP["default"];
+        }
+
+         function isTopHole(brickDef, holeId) {
+            if (brickDef.IsBase) return true;
+            if (!brickDef.TopHoleIds) return false;
+            return brickDef.TopHoleIds.includes(holeId);
+        }
+
+        // --- Build Logic ---
+        function clearStructure() {
+            // Remove bricks from the structure group
+            while (structureGroup.children.length > 0) {
+                structureGroup.remove(structureGroup.children[0]);
+            }
+            // Remove the base plate if it exists
+            if (basePlateMesh) {
+                scene.remove(basePlateMesh);
+                basePlateMesh.geometry.dispose();
+                basePlateMesh.material.dispose();
+                basePlateMesh = null;
+            }
+             console.log("Cleared previous structure and base.");
+        }
+
+        function buildStructure(jsonString) {
+            clearStructure();
+
+            let decodedData;
+            try {
+                decodedData = JSON.parse(jsonString);
+            } catch (error) {
+                console.error("Failed to parse JSON:", error);
+                updateStructureInfo("Error parsing JSON");
+                return;
+            }
+
+            if (!Array.isArray(decodedData)) {
+                console.error("Decoded JSON is not an array.");
+                 updateStructureInfo("Invalid JSON Data");
+                return;
+            }
+
+            const bricksById = {};
+            decodedData.forEach(brickData => {
+                bricksById[String(brickData.id)] = brickData;
+            });
+
+            const threeMeshes = {}; // Map brick ID to Three.js Mesh
+            const processedBrickIds = {};
+            const queue = [];
+
+            // 1. Process Base Brick
+            const baseData = bricksById["1"];
+            if (!baseData || baseData.type !== "base") {
+                console.error("Could not find base brick (ID '1', type 'base').");
+                updateStructureInfo("Missing Base Brick");
+                return;
+            }
+            const baseDef = getBrickDefinition(baseData.type);
+            if (!baseDef) {
+                console.error("Invalid brick type for base:", baseData.type);
+                updateStructureInfo("Invalid Base Type");
+                return;
+            }
+
+            const baseGeometry = new THREE.BoxGeometry(baseDef.Size.x, baseDef.Size.y, baseDef.Size.z);
+            const baseMaterial = new THREE.MeshStandardMaterial({
+                color: getBrickColorHex(baseData.colour),
+                roughness: 0.8,
+                metalness: 0.1
+            });
+            basePlateMesh = new THREE.Mesh(baseGeometry, baseMaterial);
+            basePlateMesh.position.set(0, 0, 0); // Base is centered at origin
+            scene.add(basePlateMesh); // Add base directly to scene
+
+            threeMeshes[baseData.id] = basePlateMesh;
+            processedBrickIds[baseData.id] = true;
+            queue.push(baseData.id);
+
+            console.log("Created Base Plate");
+
+            // 2. Process Connections (BFS)
+            while (queue.length > 0) {
+                const currentBrickId = queue.shift(); // Dequeue
+                const currentBrickData = bricksById[currentBrickId];
+                const currentMesh = threeMeshes[currentBrickId];
+                const currentBrickDef = getBrickDefinition(currentBrickData.type);
+
+                if(currentBrickData.type !== 'base') {
+                     console.log("Processing connections for:", currentBrickData.id, "Type:", currentBrickData.type);
+                }
+
+                if (!currentBrickData.holes || !currentMesh) continue; // Skip if data is missing
+
+                currentBrickData.holes.forEach(holeData => {
+                    const connectedBrickIdStr = String(holeData.brick);
+
+                    if (connectedBrickIdStr !== "-1" && isTopHole(currentBrickDef, holeData.id)) {
+                        if (!processedBrickIds[connectedBrickIdStr]) {
+                            const connectedBrickData = bricksById[connectedBrickIdStr];
+                            if (connectedBrickData) {
+                                const connectedBrickDef = getBrickDefinition(connectedBrickData.type);
+                                if (connectedBrickDef) {
+                                    // --- Core Placement Logic ---
+                                     console.log(`  Found connection: ${currentBrickId} (Hole ${holeData.id}) -> ${connectedBrickIdStr} (Hole ${holeData.connectedToHole}) @ ${holeData.orientation} deg`);
+
+                                    const bottomHoleLocalOffset = currentBrickDef.HoleOffsets(holeData.id);
+                                    const topHoleLocalOffset = connectedBrickDef.HoleOffsets(holeData.connectedToHole);
+
+                                    // Get world position of the hole on the current brick
+                                    const bottomHoleWorldPos = currentMesh.localToWorld(bottomHoleLocalOffset.clone());
+
+                                    // Calculate world rotation of the new brick
+                                    const parentQuaternion = new THREE.Quaternion();
+                                    currentMesh.getWorldQuaternion(parentQuaternion); // Get parent's world rotation
+
+                                    const relativeRotation = new THREE.Quaternion().setFromAxisAngle(
+                                        new THREE.Vector3(0, 1, 0), // Y-axis rotation
+                                        -THREE.MathUtils.degToRad(holeData.orientation) // Convert degrees to radians, negative for Three.js convention matching Roblox's negative angle
+                                    );
+
+                                    const worldRotation = parentQuaternion.multiply(relativeRotation); // Combine rotations
+
+                                    // Calculate the world position adjustment based on the new brick's connection point
+                                    // We need to subtract the rotated offset of the *top* brick's connection point from the world position of the *bottom* brick's hole.
+                                    const centerOffset = topHoleLocalOffset.clone().applyQuaternion(worldRotation);
+                                    const newBrickPosition = bottomHoleWorldPos.clone().sub(centerOffset);
+
+                                    // Create the new Three.js Mesh
+                                    const newGeometry = new THREE.BoxGeometry(connectedBrickDef.Size.x, connectedBrickDef.Size.y, connectedBrickDef.Size.z);
+                                    const newMaterial = new THREE.MeshStandardMaterial({
+                                        color: getBrickColorHex(connectedBrickData.colour),
+                                        roughness: 0.8,
+                                        metalness: 0.1
+                                    });
+                                    const newMesh = new THREE.Mesh(newGeometry, newMaterial);
+
+                                    // Apply calculated position and rotation
+                                    newMesh.position.copy(newBrickPosition);
+                                    newMesh.quaternion.copy(worldRotation);
+
+                                    structureGroup.add(newMesh); // Add to the structure group
+                                     console.log(`    Created Brick ${connectedBrickIdStr} at`, newMesh.position);
+
+
+                                    // Store and enqueue
+                                    threeMeshes[connectedBrickIdStr] = newMesh;
+                                    processedBrickIds[connectedBrickIdStr] = true;
+                                    queue.push(connectedBrickIdStr);
+                                    // --- End Core Placement Logic ---
+                                } else {
+                                    console.warn("Invalid brick type for connected brick:", connectedBrickData.type, "ID:", connectedBrickIdStr);
+                                }
+                            } else {
+                                console.warn("Data not found for connected brick ID:", connectedBrickIdStr, "from brick", currentBrickId);
+                            }
+                        }
+                    }
+                });
+            }
+            console.log("Structure building complete. Parts in structure:", structureGroup.children.length);
+            updateStructureInfo(); // Update display after build
+        }
+
+
+        // --- JSON Data and Cycling ---
+        // Embed your JSON data here
+        const jsonData = [
+             { name: "Json1 (1x1 Yellow)", data: `[{"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"56","connectedToHole":1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},{"id":"56","colour":"yellow","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"1","connectedToHole":0,"orientation":0}]}]`},
+             { name: "Json2 (2x1 Orange 0d)", data: `[{"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"22","connectedToHole":2,"orientation":0},{"id":1,"brick":"22","connectedToHole":3,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},{"id":"22","colour":"orange","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"1","connectedToHole":0,"orientation":0},{"id":3,"brick":"1","connectedToHole":1,"orientation":0}]}]`},
+             { name: "Json3 (2x1 Orange 90d)", data: `[{"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"22","connectedToHole":2,"orientation":90},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"22","connectedToHole":3,"orientation":90},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},{"id":"22","colour":"orange","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"1","connectedToHole":0,"orientation":0},{"id":3,"brick":"1","connectedToHole":4,"orientation":0}]}]`},
+             { name: "Json5 (Stacked 2x1)", data: `[{"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"22","connectedToHole":2,"orientation":90},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"22","connectedToHole":3,"orientation":90},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},{"id":"22","colour":"orange","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"60","connectedToHole":2,"orientation":0},{"id":1,"brick":"60","connectedToHole":3,"orientation":0},{"id":2,"brick":"1","connectedToHole":0,"orientation":0},{"id":3,"brick":"1","connectedToHole":4,"orientation":0}]},{"id":"60","colour":"yellow","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"22","connectedToHole":0,"orientation":0},{"id":3,"brick":"22","connectedToHole":1,"orientation":0}]}]`},
+             { name: "Json7 (Stacked 1x1)", data: `[{"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"35","connectedToHole":1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},{"id":"35","colour":"pink","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"56","connectedToHole":1,"orientation":0},{"id":1,"brick":"1","connectedToHole":0,"orientation":0}]},{"id":"56","colour":"yellow","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"35","connectedToHole":0,"orientation":0}]}]`},
+             { name: "Json8 (Steps)", data: `[{"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"48","connectedToHole":3,"orientation":0},{"id":1,"brick":"48","connectedToHole":4,"orientation":0},{"id":2,"brick":"48","connectedToHole":5,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"-1","connectedToHole":-1,"orientation":0}]},{"id":"48","colour":"purple","type":"3x1","macaddress":"","holes":[{"id":0,"brick":"22","connectedToHole":2,"orientation":0},{"id":1,"brick":"22","connectedToHole":3,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"1","connectedToHole":0,"orientation":0},{"id":4,"brick":"1","connectedToHole":1,"orientation":0},{"id":5,"brick":"1","connectedToHole":2,"orientation":0}]},{"id":"22","colour":"orange","type":"2x1","macaddress":"","holes":[{"id":0,"brick":"35","connectedToHole":1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"48","connectedToHole":0,"orientation":0},{"id":3,"brick":"48","connectedToHole":1,"orientation":0}]},{"id":"35","colour":"pink","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"56","connectedToHole":1,"orientation":0},{"id":1,"brick":"22","connectedToHole":0,"orientation":0}]},{"id":"56","colour":"yellow","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"35","connectedToHole":0,"orientation":0}]}]`},
+             { name: "Json10 (Corners)", data: `[{"id":"1","colour":"white","type":"base","macaddress":"","holes":[{"id":0,"brick":"56","connectedToHole":1,"orientation":0},{"id":1,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":2,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":3,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":4,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":5,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":6,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":7,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":8,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":9,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":10,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":11,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":12,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":13,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":14,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":15,"brick":"35","connectedToHole":1,"orientation":0}]},{"id":"56","colour":"yellow","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"1","connectedToHole":0,"orientation":0}]},{"id":"35","colour":"pink","type":"1x1","macaddress":"","holes":[{"id":0,"brick":"-1","connectedToHole":-1,"orientation":0},{"id":1,"brick":"1","connectedToHole":15,"orientation":0}]}]`}
+            // Add more JSON strings here
+        ];
+        let currentJsonIndex = 0;
+
+        function cycleStructure() {
+            currentJsonIndex = (currentJsonIndex + 1) % jsonData.length;
+            console.log(`Cycling to structure ${currentJsonIndex + 1}/${jsonData.length}`);
+            buildStructure(jsonData[currentJsonIndex].data);
+            updateStructureInfo();
+        }
+
+         function updateStructureInfo(errorMsg = null) {
+            const infoSpan = document.getElementById('structureInfo');
+            if (errorMsg) {
+                 infoSpan.textContent = `Error: ${errorMsg}`;
+                 infoSpan.style.color = 'red';
+            } else {
+                infoSpan.textContent = `Displaying: ${jsonData[currentJsonIndex].name} (${currentJsonIndex + 1}/${jsonData.length})`;
+                 infoSpan.style.color = 'white';
+            }
+        }
+
+        // --- Start ---
+        init();
+        animate();
+
+    </script>
+</body>
+</html>
